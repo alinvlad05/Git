@@ -129,3 +129,31 @@ this purpose is git rebase --interactive.<br/>
   d, drop = remove commit<br/>
   You can, make the interactive rebase test each commit with the --exec option, for example:<br/>
 git rebase --interactive --exec "make test"<br/>
+
+  # Index/Staging Area<br/>
+   Let's consider what happens when we use the git <br/>
+add command to add a file, but did not yet create a new commit adding it.<br/>
+A version control system needs to store such information somewhere. Git uses something <br/>
+called the index for this; it is the staging area that stores information that will go into <br/>
+the next commit. The git add <file> command stages the current contents (current version) of the file, <br/>
+adding it to the index.<br/>
+  
+git add takes the content of the file from the working directory and puts it into the staging area.<br/>
+  
+git commit -a command (which is git commit --all), which will take all the changed tracked files,<br/>
+add them to the staging area (as if with git add -u, at least in modern Git), and create a new <br/>
+commit.The new files still need to be explicitly git add to be tracked, and to be included in the new commit.<br/>
+   
+  You create a new revision with the git commit command, which takes the <br/>
+files as they are in the staging area and stores that snapshot permanently to <br/>
+your local repository.<br/>
+  
+  To see what you've changed but not yet staged, type git diff with no other <br/>
+arguments.<br/>
+  
+  To see what you've staged that will go into your next commit, use git diff <br/>
+--staged (or git diff --cached). This command compares what is in your <br/>
+staging area to the content of your last commit.<br/>
+  
+  You can use git diff HEAD to compare what is in your working directory with the <br/>
+last commit (or arbitrary commit with git diff <commit>). <br/>
