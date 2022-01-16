@@ -157,3 +157,63 @@ staging area to the content of your last commit.<br/>
   
   You can use git diff HEAD to compare what is in your working directory with the <br/>
 last commit (or arbitrary commit with git diff <commit>). <br/>
+
+  # Push modes and their use<br/>
+The behavior of git push, in the absence of the parameters specifying what to push, <br/>
+and in the absence of the configured push refspec, is specified by the push mode. <br/>
+  
+  The simple push mode – the default<br/>
+The default push mode in Git 2.0 and later is the so-called simple mode.<br/>
+  With this mode, you always push the current local branch into the same named <br/>
+branch in the remote repository. If you push into the same repository you fetch from <br/>
+(the centralized workflow), it requires the upstream to be set for the current branch. <br/>
+The upstream is named the same as the branch.<br/>
+  This is the safest option; it is well-suited for beginners, which is why it is the default <br/>
+mode. You can turn it on explicitly with git config push.default simple.<br/>
+  
+  The matching push mode for maintainers<br/>
+  Before version 2.0 of Git, the default push mode was matching. This mode is most <br/>
+useful for the maintainer (also known as the integration manager) in a blessed <br/>
+repository workflow.<br/>
+  With the matching mode, Git will push all the local branches that have their <br/>
+equivalent with the same name in the remote repository. This means that only the <br/>
+branches that are already published will be pushed to the remote repository. To <br/>
+make a new branch public you need to push it explicitly the first time, for example:<br/>
+git push origin maint-1.4<br/>
+  To turn on the matching mode globally, you can run:<br/>
+git config push.default matching<br/>
+If you want to turn it on for a specific repository, you need to use a special refspec <br/>
+composed of a sole colon. Assuming that the said repository is named origin and <br/>
+that we want a not forced push, it can be done with:<br/>
+git config remote.origin push :<br/>
+You can,push matching branches using this refspec on the command line:<br/>
+git push origin :<br/>
+  
+  The upstream push mode for the centralized workflow<br/>
+  That is what the upstream push mode was created for:<br/>
+git config push.default upstream<br/>
+This mode makes Git push the current branch to the specific branch in the remote <br/>
+repository—the branch whose changes are usually integrated into the current <br/>
+branch. This branch in the remote repository is the upstream branch<br/>
+(and can be referenced as @{upstream}). Turning this mode on makes it possible to simplify the <br/>
+last command in both examples to the following:<br/>
+git push<br/>
+The information about the upstream is created either automatically <br/>
+(while forking off the remote-tracking branch), or explicitly with the --track option. It is stored <br/>
+in the configuration file and it can be edited with ordinary configuration tools. <br/>
+Alternatively, it can be changed later with the following:<br/>
+git branch --set-upstream-to=<branchname><br/>
+  
+  The current push mode for the blessed repository workflow<br/>
+  In the blessed repository workflow, each developer has his or her own private and <br/>
+public repository. In this model, one fetches from the blessed repository and pushes <br/>
+to his or her own public repository.<br/>
+In this workflow, you start working on a feature by creating a new topic branch for it:<br/>
+git checkout -b fix-tty-bug origin/master<br/>
+When the features are ready, you push it into your public repository, perhaps <br/>
+rebasing it first to make it easier for the maintainer to merge it:<br/>
+git push origin fix-tty-bug<br/>
+  To configure Git so when on fix-tty-bug branch it is enough to just run git push, <br/>
+you need to set up Git to use the current push mode, which can be done with the following:<br/>
+git config push.default current<br/>
+This mode will push the current branch to the branch with the same name at the receiving end.<br/>
