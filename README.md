@@ -1,7 +1,7 @@
 # Git
 # Merging Changes Together<br/>
   <br/>
-  Merging branches<br/>
+  Merging branches<br/> 
 The merge operation joins two (or more) separate branches together, including all the changes since<br/>
 the point of divergence into the current branch. You do this with the git merge command:<br/>
 git checkout master<br/>
