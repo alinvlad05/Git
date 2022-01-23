@@ -217,3 +217,30 @@ git push origin fix-tty-bug<br/>
 you need to set up Git to use the current push mode, which can be done with the following:<br/>
 git config push.default current<br/>
 This mode will push the current branch to the branch with the same name at the receiving end.<br/>
+
+  # Using git stash
+ git stash command<br/>
+ Stashing takes the dirty state of your working area—that is, your modified <br/>
+tracked files in your worktree (though you can also stash untracked files with the <br/>
+--include-untracked option), and the state of the staging area, then saves this <br/>
+state, and resets both the working directory and the index to the last committed <br/>
+version (to match the HEAD commit), effectively running git reset --hard HEAD. <br/>
+You can then reapply the stashed changes at any time.<br/>
+Stashes are saved on a stack: by default you apply the last stashed changes (stash@{0}),<br/>
+though you can list stashed changes (with git stash list), and explicitly select any of the stashes.<br/>
+ By default git stash pop will apply the last stashed changes, and delete the  <br/>
+stash if applied successfully.<br/>
+ You can use any of the older stashes by specifying the stash name as an argument. <br/>
+For example, you can run git stash apply stash@{1} to apply it, and you can <br/>
+drop it (remove it from the list of stashes) with git stash drop stash@{1}; the  <br/>
+git stash pop command is just a shortcut for apply + drop.<br/>
+ You can make git stash keep the state of the index, and reset the <br/>
+working area to the staged state, with the --keep-index option.<br/>
+ To stash away your changes, Git creates two automatic commits: one for the index <br/>
+(staging area), and one for the working directory. With git stash --include-untracked,<br/>
+ Git creates an additional third automatic commit for untracked files.<br/>
+ The commit containing the work in progress in the working directory (the state of <br/>
+files tracked from there) is the stash, and has the commit with the contents of the <br/>
+staging area as its second parent. This commit is stored in a special ref: refs/stash. <br/>
+Both WIP (stash) and index commits have the revision you were on when saving <br/>
+changes as its first (and only for the index commit) parent.<br/>
