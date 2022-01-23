@@ -7,7 +7,7 @@ the point of divergence into the current branch. You do this with the git merge 
 git checkout master<br/>
 git merge bugfix123<br/>
 We first switched to a branch we want to merge into (master in this example), <br/>
-and then provided the branch to be merged (here, bugfix123).<br/>
+and then provided the branch to be merged (here, bugfix123).<br/> 
   
   1.No divergence – fast-forward and up-to-date cases<br/>
 Git would, by default, simply move the branch pointer of the current branch forward.<br/>
