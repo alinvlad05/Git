@@ -244,3 +244,106 @@ files tracked from there) is the stash, and has the commit with the contents of 
 staging area as its second parent. This commit is stored in a special ref: refs/stash. <br/>
 Both WIP (stash) and index commits have the revision you were on when saving <br/>
 changes as its first (and only for the index commit) parent.<br/>
+
+  # Command aliases for Git<br/>
+  It is very easy in theory to create an <br/>
+alias. You simply need to create an alias.<command-name> configuration variable; <br/>
+its value is the expansion of alias.<br/>
+  One of the uses for aliases is defining short abbreviations for commonly used <br/>
+commands and their arguments. Another is creating new commands. Here are a <br/>
+couple of examples you might want to set up:<br/>
+ git config --global alias.co checkout<br/>
+ git config --global alias.ci commit<br/>
+ git config --global alias.lg log --graph --oneline --decorate<br/>
+  The preceding setup means that typing, for example, git ci would be the same as <br/>
+typing git commit. Aliases take arguments just as the regular Git commands do. <br/>
+Git does not provide any default aliases that are defining shortcuts for the common <br/>
+operations.Arguments are split by space, the usual shell quoting and escaping is supported; in <br/>
+particular, you can use a quote pair ("a b") or a backslash (a\ b) to include space in a single argument.<br/>
+  You cannot have the alias with the same name as a Git command;<br/>
+  You cannot use aliases to change the behavior of commands.<br/>
+  The reasoning behind this restriction is that it could make existing scripts and hooks fail unexpectedly.<br/>
+  Aliases that hide existing Git commands (with the same name as Git commands) are simply ignored.<br/>
+  
+  # Git Administration<br/>
+  You can run auto gc manually with git gc --auto, or force garbage collection <br/>
+with git gc. The git count-objects command (perhaps with the help of the -v parameter) <br/>
+can be used to check whether there are signs that repack is needed. <br/>
+You can even run individual steps of the garbage collection individually with <br/>
+git repack, git pack-refs, git prune, and git prune-packed.<br/>
+  By default, Git would try to reuse the results of the earlier packing to reduce CPU <br/>
+time spent on the repacking, while still providing good disk space utilization. In <br/>
+some cases, you would want to more aggressively optimize the size of repository <br/>
+at the cost of it taking more time: this is possible with git gc --aggressive (or <br/>
+with repacking the repository by hand with git repack, run with appropriate <br/>
+parameters). It is recommended to do this after import from other version control <br/>
+systems; the mechanism that Git uses for importing (fast-import stream) is optimized <br/>
+for the speed of the operation, not for the final repository size.<br/>
+  There are issues of maintenance not covered by git gc, because of their nature. One <br/>
+of them is pruning (deleting) remote-tracking branches that got deleted in the remote <br/>
+repository. This can be done with git fetch --prune or git remote prune, or <br/>
+on a per-branch basis with git branch --delete --remotes <remote-tracking branch>. 
+This action is left to the user, and not run by git gc, because Git simply <br/>
+cannot know whether you have based your own work on the remote-tracking branch that is to be pruned.<br/>
+  Often, the simplest way to find and recover lost commits is to use the git reflog tool.<br/>
+For each branch, and separately for HEAD, Git silently records (logs) where the <br/>
+tip of the branch was in your local repository, at what time it was there, and how it <br/>
+got there.This record is called the reflog. Each time you commit or rewind a branch, <br/>
+the reflog for the branch and for the HEAD is updated. Each time you change the <br/>
+branches, the HEAD reflog is updated, and so on.<br/>
+  You can see where the tip of branch has been at any time by running git reflog or <br/>
+git reflog <branch>. You can run git log -g instead, where -g is a short way <br/>
+of saying --walk-reflog; this gives you a normal configurable log output. There is <br/>
+also --grep-reflog=<pattern> to search the reflog.<br/>
+  git reflog<br/>
+  The main purpose of git fsck is to check for repository corruption. <br/>
+  
+  Server-side hooks<br/>
+Hooks that are invoked on the server can be used for server administration; among <br/>
+others, these hooks can control the access to the remote repository by performing <br/>
+the authorization step, and can ensure that the commits entering the repository meet <br/>
+certain minimal criteria.<br/>
+  
+  Reducing the size taken by repositories<br/>
+  If you are hosting many forks (clones) of the same repository, you might want to <br/>
+reduce disk usage by somehow sharing common objects. One solution is to use <br/>
+alternates (for example, with git clone --reference) while creating a fork. In this <br/>
+case, the derived repository would look to its parent object storage if the object is not <br/>
+found on its own.<br/>
+  There are, two problems with this approach. First is that you need to <br/>
+ensure that the object the borrowing repository relies on does not vanish from the <br/>
+repository set as the alternate object storage (the repository you borrow from). This <br/>
+can be done, for example, by linking the borrowing repository refs in the repository <br/>
+lending the objects, for example, in the refs/borrowed/ namespace. Second is that <br/>
+the objects entering the borrowing repository are not automatically de-duplicated: <br/>
+you need to run git repack -a -d -l, which internally passes the --local option to git pack-objects.<br/>
+An alternate solution would be to keep every fork together in a single repository, <br/>
+and use gitnamespaces to manage separate views into the DAG of revisions, one <br/>
+for each fork. With plain Git, this solution means that the repository is addressed by <br/>
+the URL of the common object storage and the namespace to select a particular fork.<br/> 
+Usually, this is managed by a server configuration or by a repository management <br/>
+tool; such mechanism translates the address of the repository into a common <br/>
+repository and the namespace. The git-http-backend manpage includes an <br/>
+example configuration to serve multiple repositories from different namespaces in <br/>
+a single repository. Gitolite also has some support for namespaces in the form of <br/>
+logical and backing repositories and option namespace.pattern, though not every <br/>
+feature works for logical repositories.<br/>
+Storing multiple repositories as the namespace of a single repository avoids storing <br/>
+duplicated copies of the same objects. It automatically prevents duplication between <br/>
+new objects without the need for ongoing maintenance, as opposed to the alternates <br/>
+solution. On the other hand, the security is weaker; you need to treat anyone with <br/>
+access to the single namespace, which is within the repository as if he or she had an <br/>
+access to all the other namespaces, though this might not be a problem for your case.<br/>
+  
+  Solving the large nonresumable initial clone problem<br/>
+  One solution is to create, with the git bundle command, a static file that can be <br/>
+used for the initial clone, or as reference repository for the initial clone (the latter can <br/>
+be done with the git clone --reference=<bundle> --dissociate command if <br/>
+you have Git 2.3 or a newer looks unnecessary). This bundle file can be distributed <br/>
+using any transport; in particular, one that can be resumed if interrupted, be it HTTP, <br/>
+FTP, rsync, or BitTorrent. The conventions people use, besides explaining how to <br/>
+get such a bundle in the developer documentation, is to use the same URL as for the <br/>
+repository, but with the .bundle extension (instead of an empty extension or a .git suffix).<br/>
+There are also more esoteric approaches like a step by step deepening of a shallow <br/>
+clone (or perhaps, just using a shallow clone with git clone --depth is all that's <br/>
+needed), or using approaches such as GitTorrent.<br/>
